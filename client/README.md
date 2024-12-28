@@ -1,8 +1,22 @@
-# React + Vite
+Voting Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Front and backend application for a voting system where users
+can vote for candidates. It provides functionalities for user
+authentication, candidate management, and voting.
 
-Currently, two official plugins are available:
+Features
+User sign up and login with Aadhar Card Number and password
+User can view the list of candidates
+User can vote for a candidate (only once)
+Admin can manage candidates (add, update, delete)
+Allows multiple admins
+Admin cannot vote
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Technologies Used
+
+Flask
+React
+mySQL
+JSON Web Tokens (JWT) for authentication
+Redis
+CORS
