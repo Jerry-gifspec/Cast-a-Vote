@@ -1,91 +1,106 @@
+// VoterRegistration.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const VoterRegister = () => {
-  const [voterData, setVoterData] = useState({
+function VoterRegistration() {
+  const [formData, setFormData] = useState({
     name: "",
     city: "",
     contact: "",
   });
-
-  const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setVoterData({ ...voterData, [e.target.name]: e.target.value });
-  };
-
-  const generateAadhar = () => {
-    return Math.floor(100000000000 + Math.random() * 900000000000).toString();
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const aadhar = generateAadhar();
     try {
       const response = await axios.post(
         "http://localhost:5000/api/voter/register",
+        formData,
         {
-          ...voterData,
-          aadhar,
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-      console.log("Voter Registered:", response.data);
-      navigate("/login");
-    } catch (error) {
-      console.error(
-        "Error registering voter:",
-        error.response?.data || error.message
+      setMessage(
+        `Voter registered successfully! \nAadhar number: ${response.data.aadhar_number}\nTemporary password: ${response.data.temporary_password}`
       );
+      setFormData({
+        name: "",
+        city: "",
+        contact: "",
+      });
+    } catch (err) {
+      setError("Registration failed. Please try again.");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h1>Voter Registration</h1>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={voterData.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="city"
-          placeholder="City"
-          value={voterData.city}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="contact"
-          placeholder="Contact"
-          value={voterData.contact}
-          onChange={handleChange}
-          required
-        />
-        <button type="submit">Register</button>
+    <div className="container mx-auto px-4 py-8">
+      <h2 className="text-2xl font-bold mb-6">Register New Voter</h2>
+
+      {message && (
+        <div className="bg-green-100 text-green-700 p-3 rounded mb-4 whitespace-pre-line">
+          {message}
+        </div>
+      )}
+      {error && (
+        <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>
+      )}
+
+      <form onSubmit={handleSubmit} className="max-w-lg">
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-1">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1">City</label>
+            <input
+              type="text"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1">Contact</label>
+            <input
+              type="tel"
+              name="contact"
+              value={formData.contact}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Register Voter
+          </button>
+        </div>
       </form>
     </div>
   );
-};
+}
 
-const styles = {
-  container: {
-    textAlign: "center",
-    padding: "2rem",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-    maxWidth: "300px",
-    margin: "0 auto",
-  },
-};
-
-export default VoterRegister;
+export default VoterRegistration;
