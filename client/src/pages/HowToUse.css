@@ -1,0 +1,47 @@
+.how-to-use {
+  padding: 2rem;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.how-to-use h2 {
+  color: #4b3621;
+  margin-bottom: 1.5rem;
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap; /* Makes it responsive */
+  gap: 1rem;
+}
+
+.step-button {
+  background-color: hwb(197 0% 46%);
+  color: whitesmoke;
+  border: none;
+  padding: 1rem;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.step-button:hover {
+  background-color: rgb(185, 202, 209);
+  transform: translateY(-3px);
+}
+
+.step-button h3 {
+  margin: 0;
+}
+
+.arrow {
+  margin-left: 1rem;
+  font-size: 1.5rem;
+  color: whitesmoke;
+}

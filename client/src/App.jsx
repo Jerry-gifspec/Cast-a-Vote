@@ -13,6 +13,8 @@ import Signup from "./components/SignUp";
 import VotingDashboard from "./components/VotingDashboard";
 import Results from "./components/Results";
 import AdminPanel from "./components/AdminPanel";
+import Footer from "./pages/Footer";
+import HowToUse from "./pages/HowToUse";
 
 function App() {
   // Initialize AOS
@@ -41,6 +43,12 @@ function App() {
               </div>
               <div data-aos="fade-right">
                 <About />
+              </div>
+              <div data-aos="fade-up">
+                <HowToUse />
+                <div data-aos="fade-up">
+                  <Footer />
+                </div>
               </div>
             </>
           }

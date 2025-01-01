@@ -6,7 +6,7 @@ const About = () => {
       <h2 style={styles.header}>About Us</h2>
       <ul style={styles.list}>
         <div>
-          <h3>We seek to;</h3>
+          <h3>We seek to:</h3>
         </div>
         <li>
           Unite Cameroonians in South Korea through democratic engagement.
@@ -29,13 +29,13 @@ const About = () => {
         </li>
       </ul>
       <div style={styles.scheduleContainer}>
-        <h3 style={styles.text}>Schedule: </h3>
+        <h2 style={styles.brand}>Schedule </h2>
         <a
           href="/Calendar.pdf"
           target="_blank"
           rel="noopener noreferrer"
           style={styles.link}>
-          View Calendar
+          <button type="submit">View Calendar</button>
         </a>
       </div>
     </div>

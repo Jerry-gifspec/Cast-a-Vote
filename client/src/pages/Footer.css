@@ -1,0 +1,24 @@
+.footer {
+  background-color: darkcyan;
+  color: rgba(235, 232, 232, 0.847);
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.footer-content p {
+  margin: 0.5rem 0;
+}
+
+.footer-links {
+  margin-top: 1rem;
+}
+
+.footer-link {
+  color: hsl(197, 4%, 66%);
+  text-decoration: none;
+  margin: 0 0.5rem;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
