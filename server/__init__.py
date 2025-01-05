@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from .database import db, init_db, shutdown_session
-from config import Config
+from .config import Config
 
 def create_app():
     """Application factory function"""
@@ -32,6 +32,9 @@ def create_app():
     with app.app_context():
         init_db()
     
+    # Register error handlers
+    register_error_handlers(app)
+    
     return app
 
 # Error handlers
@@ -47,4 +50,5 @@ def register_error_handlers(app):
 
 # Create the application instance
 app = create_app()
-register_error_handlers(app)
+
+

@@ -59,6 +59,7 @@ const Signup = () => {
             placeholder="Username"
             value={formData.username}
             onChange={handleChange}
+            autocomplete="username"
             required
           />
           <input
@@ -67,6 +68,7 @@ const Signup = () => {
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
+            autocomplete="email"
             required
           />
           <input
@@ -75,10 +77,11 @@ const Signup = () => {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
+            autocomplete="current-password"
             required
           />
           <select name="role" value={formData.role} onChange={handleChange}>
-            <option value="Voter">Voter</option>
+            <option value="voter">Voter</option>
             <option value="admin">Admin</option>
           </select>
           <button type="submit">Submit</button>

@@ -1,220 +1,140 @@
-# routes.py
+from flask import Blueprint, request, jsonify
+from werkzeug.security import check_password_hash
+from datetime import datetime, timedelta
+import jwt
+from models import db, Voter, Admin
+from functools import wraps
+from config import Config  # Assuming you have a config.py file with your SECRET_KEY
 
-# Authentication routes
-@app.route('/signup', methods=['POST'])
-def signup():
-    data = request.json
-    if User.query.filter_by(aadhar_number=data['aadhar_number']).first():
-        return jsonify({'message': 'Aadhar number already registered'}), 400
-    
-    user = User(
-        name=data['name'],
-        aadhar_number=data['aadhar_number'],
-        is_admin=data.get('is_admin', False)
-    )
-    user.set_password(data['password'])
-    
-    db.session.add(user)
-    db.session.commit()
-    
-    return jsonify({'message': 'User registered successfully'}), 201
+# Initialize Blueprint
+auth_bp = Blueprint('auth', __name__)
 
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.json
-    user = User.query.filter_by(aadhar_number=data['aadhar_number']).first()
-    
-    if user and user.check_password(data['password']):
-        token = jwt.encode({
-            'user_id': user.id,
-            'exp': datetime.utcnow() + timedelta(hours=24)
-        }, Config.SECRET_KEY)
-        
-        return jsonify({
-            'token': token,
-            'is_admin': user.is_admin
-        })
-    
-    return jsonify({'message': 'Invalid credentials'}), 401
+# Token required decorator
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'message': 'Token is missing'}), 401
+        try:
+            # Remove 'Bearer ' from token
+            token = token.split(' ')[1]
+            data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
+            current_user = Voter.query.get(data['user_id']) or Admin.query.get(data['user_id'])
+            if not current_user:
+                return jsonify({'message': 'Invalid token'}), 401
+        except Exception as e:
+            print(e)
+            return jsonify({'message': 'Invalid token'}), 401
+        return f(current_user, *args, **kwargs)
+    return decorated
 
-# Voting routes
-@app.route('/electors', methods=['GET'])
-@token_required
-def get_electors(current_user):
-    candidates = Candidate.query.all()
-    return jsonify([{
-        'id': c.id,
-        'name': c.name,
-        'position': c.position,
-        'votes': c.votes
-    } for c in candidates])
+# Admin Registration Route
+@auth_bp.route('/admin/register', methods=['POST'])
+def register_admin():
+    data = request.get_json()
+    name = data.get('name')
+    aadhar_number = data.get('aadhar_number')
+    password = data.get('password')
 
-@app.route('/vote/<int:elector_id>', methods=['POST'])
-@token_required
-def vote(current_user, elector_id):
-    if current_user.has_voted:
-        return jsonify({'message': 'You have already voted'}), 400
-    
-    candidate = Candidate.query.get_or_404(elector_id)
-    
-    vote = Vote(user_id=current_user.id, candidate_id=elector_id)
-    candidate.votes += 1
-    current_user.has_voted = True
-    
-    db.session.add(vote)
-    db.session.commit()
-    
-    return jsonify({'message': 'Vote recorded successfully'})
+    if not name or not aadhar_number or not password:
+        return jsonify({'message': 'Missing required fields'}), 400
 
-@app.route('/vote/counts', methods=['GET'])
-def get_vote_counts():
-    candidates = Candidate.query.order_by(Candidate.votes.desc()).all()
-    return jsonify([{
-        'id': c.id,
-        'name': c.name,
-        'position': c.position,
-        'votes': c.votes
-    } for c in candidates])
+    # Check if admin already exists
+    if Admin.query.filter_by(aadhar_number=aadhar_number).first():
+        return jsonify({'message': 'Admin already exists'}), 400
 
-# User profile routes
-@app.route('/profile', methods=['GET'])
-@token_required
-def get_profile(current_user):
-    return jsonify({
-        'id': current_user.id,
-        'name': current_user.name,
-        'aadhar_number': current_user.aadhar_number,
-        'is_admin': current_user.is_admin,
-        'has_voted': current_user.has_voted
-    })
+    # Create new admin
+    new_admin = Admin(name=name, aadhar_number=aadhar_number)
+    new_admin.set_password(password)
 
-@app.route('/profile/password', methods=['PUT'])
-@token_required
-def change_password(current_user):
-    data = request.json
-    if not current_user.check_password(data['old_password']):
-        return jsonify({'message': 'Invalid old password'}), 400
-    
-    current_user.set_password(data['new_password'])
-    db.session.commit()
-    
-    return jsonify({'message': 'Password updated successfully'})
+    try:
+        db.session.add(new_admin)
+        db.session.commit()
+        return jsonify({'message': 'Admin registered successfully'}), 201
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
 
-# Admin routes
-@app.route('/electors', methods=['POST'])
-@admin_required
-def create_elector(current_user):
-    data = request.json
-    candidate = Candidate(
-        name=data['name'],
-        party=data['position']
-    )
-    
-    db.session.add(candidate)
-    db.session.commit()
-    
-    return jsonify({'message': 'Candidate created successfully'}), 201
+# Admin Login Route
+@auth_bp.route('/admin/login', methods=['POST'])
+def login_admin():
+    data = request.get_json()
+    aadhar_number = data.get('aadhar_number')
+    password = data.get('password')
 
-@app.route('/electors/<int:elector_id>', methods=['PUT'])
-@admin_required
-def update_elector(current_user, elector_id):
-    candidate = Candidate.query.get_or_404(elector_id)
-    data = request.json
-    
-    candidate.name = data.get('name', candidate.name)
-    candidate.position = data.get('position', candidate.position)
-    
-    db.session.commit()
-    
-    return jsonify({'message': 'Candidate updated successfully'})
+    admin = Admin.query.filter_by(aadhar_number=aadhar_number).first()
+    if not admin or not admin.check_password(password):
+        return jsonify({'message': 'Invalid credentials'}), 401
 
-@app.route('/electors/<int:elector_id>', methods=['DELETE'])
-@admin_required
-def delete_elector(current_user, elector_id):
-    candidate = Candidate.query.get_or_404(elector_id)
-    
-    db.session.delete(candidate)
-    db.session.commit()
-    
-    return jsonify({'message': 'Candidate deleted successfully'})
+    # Generate JWT token
+    token = jwt.encode({'user_id': admin.admin_id, 'exp': datetime.utcnow() + timedelta(hours=1)}, Config.SECRET_KEY, algorithm='HS256')
 
-# API routes for testing
-@app.route('/api/voters', methods=['GET'])
-@admin_required
-def get_voters(current_user):
-    voters = User.query.filter_by(is_admin=False).all()
-    return jsonify([{
-        'id': v.id,
-        'name': v.name,
-        'aadhar_number': v.aadhar_number,
-        'has_voted': v.has_voted
-    } for v in voters])
+    return jsonify({'message': 'Login successful', 'token': token})
 
-@app.route('/api/candidates', methods=['GET'])
-def get_candidates():
-    candidates = Candidate.query.all()
-    return jsonify([{
-        'id': c.id,
-        'name': c.name,
-        'position': c.position,
-        'votes': c.votes
-    } for c in candidates])
-
-@app.route('/api/voter/register', methods=['POST'])
-@admin_required
+# Voter Registration Route
+@auth_bp.route('/voter/register', methods=['POST'])
 def register_voter():
-    data = request.json
-    aadhar = generate_aadhar()
-    temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
-    
-    new_voter = User(
-        name=data['name'],
-        city=data['city'],
-        contact=data['contact'],
-        aadhar_number=aadhar,
-        password=generate_password_hash(temp_password),
-        is_admin=False
-    )
-    
+    data = request.get_json()
+    name = data.get('name')
+    aadhar_number = data.get('aadhar_number')
+    password = data.get('password')
+
+    if not name or not aadhar_number or not password:
+        return jsonify({'message': 'Missing required fields'}), 400
+
+    # Check if voter already exists
+    if Voter.query.filter_by(aadhar_number=aadhar_number).first():
+        return jsonify({'message': 'Voter already exists'}), 400
+
+    # Create new voter
+    new_voter = Voter(name=name, aadhar_number=aadhar_number)
+    new_voter.set_password(password)
+
     try:
         db.session.add(new_voter)
         db.session.commit()
-        return jsonify({
-            'message': 'Voter registered successfully',
-            'aadhar_number': aadhar,
-            'temporary_password': temp_password
-        }), 201
+        return jsonify({'message': 'Voter registered successfully'}), 201
     except Exception as e:
-        db.session.rollback()
-        return jsonify({'message': 'Registration failed'}), 400
+        return jsonify({'message': str(e)}), 500
 
-@app.route('/api/candidate/register', methods=['POST'])
-@admin_required
-def register_candidate():
-    data = request.json
-    aadhar = generate_aadhar()
-    
-    new_candidate = Candidate(
-        name=data['name'],
-        age=data['age'],
-        city=data['city'],
-        contact=data['contact'],
-        position=data['position'],
-        nationality=data['nationality'],
-        policy=data['policy'],
-        aadhar_number=aadhar
-    )
-    
-    try:
-        db.session.add(new_candidate)
-        db.session.commit()
-        return jsonify({
-            'message': 'Candidate registered successfully',
-            'aadhar_number': aadhar
-        }), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'message': 'Registration failed'}), 400
-    
-    
+# Voter Login Route
+@auth_bp.route('/voter/login', methods=['POST'])
+def login_voter():
+    data = request.get_json()
+    aadhar_number = data.get('aadhar_number')
+    password = data.get('password')
 
+    voter = Voter.query.filter_by(aadhar_number=aadhar_number).first()
+    if not voter or not voter.check_password(password):
+        return jsonify({'message': 'Invalid credentials'}), 401
+
+    # Generate JWT token
+    token = jwt.encode({'user_id': voter.voter_id, 'exp': datetime.utcnow() + timedelta(hours=1)}, Config.SECRET_KEY, algorithm='HS256')
+
+    return jsonify({'message': 'Login successful', 'token': token})
+
+# Check if voter has voted
+@auth_bp.route('/voter/has_voted', methods=['GET'])
+@token_required
+def has_voted(current_user):
+    if isinstance(current_user, Voter):
+        return jsonify({'has_voted': current_user.has_voted})
+    return jsonify({'message': 'Unauthorized access'}), 403
+
+# View all voters (for admin)
+@auth_bp.route('/admin/voters', methods=['GET'])
+@token_required
+def view_voters(current_user):
+    if isinstance(current_user, Admin):
+        voters = Voter.query.all()
+        return jsonify([voter.serialize() for voter in voters]), 200
+    return jsonify({'message': 'Admin privileges required'}), 403
+
+# View all admins (for admin)
+@auth_bp.route('/admin/admins', methods=['GET'])
+@token_required
+def view_admins(current_user):
+    if isinstance(current_user, Admin):
+        admins = Admin.query.all()
+        return jsonify([admin.serialize() for admin in admins]), 200
+    return jsonify({'message': 'Admin privileges required'}), 403
