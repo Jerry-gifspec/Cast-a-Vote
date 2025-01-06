@@ -25,6 +25,8 @@ dist-ssr
 
 
 node_modules/
-.env
-__pycache__/
+server/.env
+__pycache__
 .venv/
+.env
+
