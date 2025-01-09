@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom"; // For accessing URL parameters
 import axios from "axios";
 
 const VotingDashboard = () => {
+  const { electionId } = useParams(); // Get the electionId from the URL
   const [candidates, setCandidates] = useState([]);
   const [message, setMessage] = useState("");
 
@@ -9,7 +11,7 @@ const VotingDashboard = () => {
     const fetchCandidates = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/candidates"
+          `http://localhost:5000/api/elections/${electionId}/candidates`
         );
         setCandidates(response.data);
       } catch (error) {
@@ -17,7 +19,7 @@ const VotingDashboard = () => {
       }
     };
     fetchCandidates();
-  }, []);
+  }, [electionId]);
 
   const handleVote = async (candidateId) => {
     try {
@@ -35,7 +37,7 @@ const VotingDashboard = () => {
 
   return (
     <div className="voting-dashboard">
-      <h2>Voting Dashboard</h2>
+      <h2>Voting Dashboard for Election {electionId}</h2>
       {candidates.map((candidate) => (
         <div key={candidate.candidate_id}>
           <h3>{candidate.name}</h3>

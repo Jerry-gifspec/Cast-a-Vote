@@ -32,7 +32,7 @@
     /profile/password: PUT - Change the user's password
 
 ---> Admin Elector Management:
-    /electors: POST - Create a new elec tor
+    /electors: POST - Create a new elector
     /electors/:electorId: PUT - Update an existing elector
     /electors/:electorId: DELETE - Delete a elector from the list
 

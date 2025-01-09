@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Login from "./pages/Login";
@@ -11,6 +11,7 @@ import VoterRegister from "./pages/VoterRegister";
 import CandidateProfile from "./pages/CandidateProfile";
 import Signup from "./components/SignUp";
 import VotingDashboard from "./components/VotingDashboard";
+import ElectionPage from "./components/ElectionPage";
 import Results from "./components/Results";
 import AdminPanel from "./components/AdminPanel";
 import Footer from "./pages/Footer";
@@ -114,6 +115,14 @@ function App() {
           element={
             <div data-aos="fade-up">
               <VoterRegister />
+            </div>
+          }
+        />
+        <Route
+          path="/elections"
+          element={
+            <div data-aos="fade-up">
+              <ElectionPage />
             </div>
           }
         />

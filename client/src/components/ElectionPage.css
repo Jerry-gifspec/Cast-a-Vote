@@ -1,0 +1,56 @@
+.election-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.election-title {
+  text-align: center;
+  color: #333;
+}
+
+.loading,
+.error,
+.no-elections {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+.election-list {
+  list-style: none;
+  padding: 0;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.election-item {
+  background: #f9f9f9;
+  margin: 10px 0;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.election-item h2 {
+  margin: 0 0 10px;
+  color: #0056b3;
+}
+
+.election-item p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.details-btn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.details-btn:hover {
+  background: #0056b3;
+}

@@ -29,4 +29,5 @@ server/.env
 __pycache__
 .venv/
 .env
+Node.js package.json
 
