@@ -112,8 +112,8 @@ const Signup = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <ScrollAnimations>
+    <ScrollAnimations>
+      <div style={styles.container}>
         <h2 data-aos="fade-up">Sign Up</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
           {error && <div style={styles.error}>{error}</div>}
@@ -168,8 +168,8 @@ const Signup = () => {
             {loading ? "Signing up..." : "Submit"}
           </button>
         </form>
-      </ScrollAnimations>
-    </div>
+      </div>
+    </ScrollAnimations>
   );
 };
 
@@ -178,6 +178,14 @@ const styles = {
     textAlign: "center",
     padding: "2rem",
     color: "#4B3621",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    alignItems: "center",
+  },
+  title: {
+    marginBottom: "10px",
+    fontSize: "2rem",
   },
   form: {
     display: "flex",

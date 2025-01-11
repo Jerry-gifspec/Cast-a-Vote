@@ -19,12 +19,22 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-links">
-        <Link to="/">Home</Link>
+        <Link to="/">
+          <img
+            src="/logo.jpg"
+            alt="CAMASKO Voter Wave Logo"
+            className="logo-image"
+          />
+        </Link>
       </div>
+      <hgroup>
+        <h1>CAMASKO VOTER WAVE</h1>
+        <span>2024-2025</span>
+      </hgroup>
       <div className="navbar-actions">
-        {/* <button className="dropdown-button" onClick={toggleDropdown}>
+        <button className="dropdown-button" onClick={toggleDropdown}>
           Menu
-        </button> */}
+        </button>
         {isDropdownOpen && (
           <div className="dropdown-menu">
             <Link to="/about" className="dropdown-item">

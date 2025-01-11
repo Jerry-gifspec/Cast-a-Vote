@@ -59,6 +59,9 @@ const styles = {
     padding: "0 1rem",
     fontSize: "1.2rem",
     color: "#333333",
+    display: "flex",
+    flexDirection: "column",
+    gap: "5px",
   },
   text: {
     fontSize: "1.2rem",
